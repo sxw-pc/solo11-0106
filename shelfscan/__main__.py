@@ -9,6 +9,8 @@ def initialize(db_path,config):
     with db:
         for table,cols in [('batch',['id','version','start','end','status']),('copy',['id','planned_shelf','loaned','batch']),('reader',['id','shelf','window_start','window_end'])]:
             for row in c[table]:db.execute(f'INSERT OR IGNORE INTO {table} VALUES ({",".join("?" for _ in cols)})',[row[k] for k in cols])
+        fc=c.get('fusion_contract',{'strategy':'cumulative','burst_window_seconds':30.0,'confidence_multiplier':1.5,'contract_version':'fc-1'})
+        db.execute('INSERT OR IGNORE INTO fusion_contract VALUES (1,?,?,?,?)',[fc[k] for k in ('strategy','burst_window_seconds','confidence_multiplier','contract_version')])
     db.close()
 def demo(workdir=None):
     root=Path(workdir or tempfile.mkdtemp(prefix='shelfscan-'));root.mkdir(parents=True,exist_ok=True);fix=Path(__file__).resolve().parent.parent/'fixtures';db=root/'shelfscan.db'

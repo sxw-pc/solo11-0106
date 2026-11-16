@@ -1,1 +1,19 @@
-{"batch":[{"id":"INV-1","version":"v1","start":"2026-01-01T00:00:00+00:00","end":"2026-01-02T00:00:00+00:00","status":"待接收"}],"copy":[{"id":"C1","planned_shelf":"S1","loaned":0,"batch":"INV-1"},{"id":"C2","planned_shelf":"S2","loaned":1,"batch":"INV-1"}],"reader":[{"id":"R1","shelf":"S1","window_start":"2026-01-01T00:00:00+00:00","window_end":"2026-01-02T00:00:00+00:00"},{"id":"R2","shelf":"S2","window_start":"2026-01-01T00:00:00+00:00","window_end":"2026-01-02T00:00:00+00:00"}]}
+{
+  "batch": [
+    {"id": "INV-1", "version": "v1", "start": "2026-01-01T00:00:00+00:00", "end": "2026-01-02T00:00:00+00:00", "status": "待接收"}
+  ],
+  "copy": [
+    {"id": "C1", "planned_shelf": "S1", "loaned": 0, "batch": "INV-1"},
+    {"id": "C2", "planned_shelf": "S2", "loaned": 1, "batch": "INV-1"}
+  ],
+  "reader": [
+    {"id": "R1", "shelf": "S1", "window_start": "2026-01-01T00:00:00+00:00", "window_end": "2026-01-02T00:00:00+00:00"},
+    {"id": "R2", "shelf": "S2", "window_start": "2026-01-01T00:00:00+00:00", "window_end": "2026-01-02T00:00:00+00:00"}
+  ],
+  "fusion_contract": {
+    "strategy": "cumulative",
+    "burst_window_seconds": 30.0,
+    "confidence_multiplier": 1.5,
+    "contract_version": "fc-1"
+  }
+}

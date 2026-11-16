@@ -2,7 +2,7 @@ import hashlib,json
 from datetime import datetime
 from pathlib import Path
 from .store import connect
-KINDS={'scan','borrow','return'}
+KINDS={'scan','borrow','return','heartbeat'}
 def when(s):
     d=datetime.fromisoformat(s.replace('Z','+00:00'))
     if d.tzinfo is None:raise ValueError('timezone_required')
