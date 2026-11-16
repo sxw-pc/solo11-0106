@@ -28,4 +28,7 @@ def test_return(tmp_path):
 def test_reader_window(tmp_path):
     db=setup(tmp_path);add(tmp_path,db,[event(at='2026-01-03T08:00:00+00:00')]);assert evaluate(db)['C1']=='缺失'
 def test_identity_conflict(tmp_path):
-    db=setup(tmp_path);ingest(FIX/'events.jsonl',db);add(tmp_path,db,[event(signal=20)]);c=connect(db);assert c.execute("SELECT count(*) FROM issue WHERE code='identity_conflict'").fetchone()[0]==1
+    db=setup(tmp_path);ingest(FIX/'events.jsonl',db);add(tmp_path,db,[event(signal=20)]);c=connect(db);assert c.execute("SELECT count(*) FROM issue WHERE code='identity_conflict'").fetchone()[0]==1;assert evaluate(db)['C1']=='待核'
+def test_unexpected_copy(tmp_path):
+    db=setup(tmp_path);add(tmp_path,db,[event(copy_id='EXTRA')]);evaluate(db);c=connect(db)
+    assert c.execute("SELECT count(*) FROM issue WHERE code='unexpected_copy'").fetchone()[0]==1

@@ -8,6 +8,9 @@ def evaluate(path):
     with db:
         db.execute('DELETE FROM decision');db.execute("DELETE FROM issue WHERE code NOT IN ('parse_error','identity_conflict')")
         events=[dict(r) for r in db.execute('SELECT * FROM event ORDER BY at,id')]
+        known={r['id'] for r in db.execute('SELECT id FROM copy')}
+        for e in events:
+            if e['copy_id'] not in known:db.execute('INSERT INTO issue(code,copy_id,event_id,detail) VALUES (?,?,?,?)',('unexpected_copy',e['copy_id'],e['id'],'not in frozen snapshot'))
         readers={r['id']:dict(r) for r in db.execute('SELECT * FROM reader')}
         devices=defaultdict(list);gaps=set()
         for e in events:devices[e['device']].append(e)
@@ -41,7 +44,7 @@ def evaluate(path):
                 if len(ranks)>1 and ranks[0][1]<ranks[1][1]*1.5:issues.append(('multi_shelf',ranks[0][0]))
                 else:actual=ranks[0][0]
             if loaned:status='借出'
-            elif any(code in ('multi_shelf','identity_conflict') for code,_ in issues):status='待核'
+            elif any(code=='multi_shelf' for code,_ in issues) or db.execute("SELECT 1 FROM issue WHERE code='identity_conflict' AND copy_id=?",(cid,)).fetchone():status='待核'
             elif actual is None:status='缺失'
             elif actual!=book['planned_shelf']:status='串架'
             else:status='在架'
