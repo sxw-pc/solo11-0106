@@ -22,8 +22,8 @@ def ingest(path,db_path):
                 if old:
                     if old['sha256']!=digest:db.execute('INSERT INTO issue(code,copy_id,detail) VALUES (?,?,?)',('identity_conflict',copy,f'{device}:{seq}'))
                     continue
-                db.execute('INSERT INTO event(source_id,line_no,device,seq,kind,at,copy_id,shelf,signal,payload,sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-                    (sid,line,device,seq,kind,r['at'],copy,r.get('shelf'),r.get('signal'),text,digest));count+=1
+                eid=db.execute('INSERT INTO event(source_id,line_no,device,seq,kind,at,copy_id,shelf,signal,payload,sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                    (sid,line,device,seq,kind,r['at'],copy,r.get('shelf'),r.get('signal'),text,digest)).lastrowid;db.execute('INSERT INTO evidence(event_id,source_sha256,payload_sha256,role) VALUES (?,?,?,?)',(eid,h,digest,'inventory_event'));count+=1
             except (ValueError,KeyError,TypeError,json.JSONDecodeError) as e:
                 db.execute('INSERT INTO issue(code,copy_id,detail) VALUES (?,?,?)',('parse_error',str(line),str(e)))
     db.close();return {'imported':count,'duplicate_file':False}

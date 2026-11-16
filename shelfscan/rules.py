@@ -6,6 +6,8 @@ VERSION='1'
 def evaluate(path):
     db=connect(path);results={}
     with db:
+        run_id=db.execute("INSERT INTO run(status,started_at) VALUES ('待接收',CURRENT_TIMESTAMP)").lastrowid
+        db.execute("UPDATE run SET status='已校验' WHERE id=?",(run_id,))
         db.execute('DELETE FROM decision');db.execute("DELETE FROM issue WHERE code NOT IN ('parse_error','identity_conflict')")
         events=[dict(r) for r in db.execute('SELECT * FROM event ORDER BY at,id')]
         known={r['id'] for r in db.execute('SELECT id FROM copy')}
@@ -53,4 +55,5 @@ def evaluate(path):
                 db.execute('INSERT INTO issue(code,copy_id,event_id,detail) VALUES (?,?,?,?)',(code,cid,eid if isinstance(eid,int) else None,str(eid)))
             detail=json.dumps({'snapshot_version':batch['version'],'event_ids':[e['id'] for e in ee],'candidate_scores':dict(candidate),'issues':[c for c,_ in issues]},ensure_ascii=False)
             db.execute('INSERT INTO decision VALUES (?,?,?,?,?)',(cid,status,actual,detail,VERSION));results[cid]=status
+        db.execute("UPDATE run SET status=CASE WHEN EXISTS(SELECT 1 FROM decision WHERE status IN ('待核','缺失','串架')) THEN '待核' ELSE '已判定' END,ended_at=CURRENT_TIMESTAMP WHERE id=?",(run_id,))
     db.close();return results
