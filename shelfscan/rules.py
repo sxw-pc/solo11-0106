@@ -1,0 +1,53 @@
+import json
+from collections import defaultdict
+from .store import connect
+from .ingest import when
+VERSION='1'
+def evaluate(path):
+    db=connect(path);results={}
+    with db:
+        db.execute('DELETE FROM decision');db.execute("DELETE FROM issue WHERE code NOT IN ('parse_error','identity_conflict')")
+        events=[dict(r) for r in db.execute('SELECT * FROM event ORDER BY at,id')]
+        readers={r['id']:dict(r) for r in db.execute('SELECT * FROM reader')}
+        devices=defaultdict(list);gaps=set()
+        for e in events:devices[e['device']].append(e)
+        for device,ee in devices.items():
+            seq={e['seq'] for e in ee}
+            if max(seq)-min(seq)+1!=len(seq):gaps.update(e['copy_id'] for e in ee)
+        for book in db.execute('SELECT * FROM copy'):
+            cid=book['id'];batch=db.execute('SELECT * FROM batch WHERE id=?',(book['batch'],)).fetchone();ee=[e for e in events if e['copy_id']==cid]
+            loaned=bool(book['loaned']);scans=[];issues=[]
+            if cid in gaps:issues.append(('sequence_gap',None))
+            for e in ee:
+                t=when(e['at'])
+                if not when(batch['start'])<=t<=when(batch['end']):issues.append(('outside_batch',e['id']));continue
+                if e['kind']=='borrow':
+                    if loaned:issues.append(('bad_loan_transition',e['id']))
+                    loaned=True
+                elif e['kind']=='return':
+                    if not loaned:issues.append(('bad_loan_transition',e['id']))
+                    loaned=False
+                else:
+                    reader=readers.get(e['device'])
+                    if not reader or not when(reader['window_start'])<=t<when(reader['window_end']) or e['shelf']!=reader['shelf']:
+                        issues.append(('reader_location',e['id']));continue
+                    if e['signal'] is None or not 0<=e['signal']<=100:issues.append(('signal_invalid',e['id']));continue
+                    scans.append(e)
+            candidate=defaultdict(float)
+            for e in scans:candidate[e['shelf']]+=e['signal']
+            actual=None
+            if candidate:
+                ranks=sorted(candidate.items(),key=lambda x:(-x[1],x[0]))
+                if len(ranks)>1 and ranks[0][1]<ranks[1][1]*1.5:issues.append(('multi_shelf',ranks[0][0]))
+                else:actual=ranks[0][0]
+            if loaned:status='借出'
+            elif any(code in ('multi_shelf','identity_conflict') for code,_ in issues):status='待核'
+            elif actual is None:status='缺失'
+            elif actual!=book['planned_shelf']:status='串架'
+            else:status='在架'
+            if not book['id'] in [e['copy_id'] for e in events]:issues.append(('no_scan',None))
+            for code,eid in issues:
+                db.execute('INSERT INTO issue(code,copy_id,event_id,detail) VALUES (?,?,?,?)',(code,cid,eid if isinstance(eid,int) else None,str(eid)))
+            detail=json.dumps({'snapshot_version':batch['version'],'event_ids':[e['id'] for e in ee],'candidate_scores':dict(candidate),'issues':[c for c,_ in issues]},ensure_ascii=False)
+            db.execute('INSERT INTO decision VALUES (?,?,?,?,?)',(cid,status,actual,detail,VERSION));results[cid]=status
+    db.close();return results
