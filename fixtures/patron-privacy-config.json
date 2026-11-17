@@ -1,0 +1,51 @@
+{
+  "reader": [
+    {
+      "window_start": "2030-06-01T09:00:00Z",
+      "id": "R1",
+      "shelf": "S1",
+      "window_end": "2030-06-02T00:00:00Z"
+    },
+    {
+      "window_start": "2030-06-01T09:00:00Z",
+      "id": "R2",
+      "shelf": "S2",
+      "window_end": "2030-06-02T00:00:00Z"
+    },
+    {
+      "window_start": "2030-06-01T09:00:00Z",
+      "id": "R3",
+      "shelf": "S3",
+      "window_end": "2030-06-02T00:00:00Z"
+    }
+  ],
+  "batch": [
+    {
+      "end": "2030-06-02T00:00:00Z",
+      "start": "2030-06-01T09:00:00Z",
+      "id": "INV-Q",
+      "status": "待接收",
+      "version": "v1"
+    }
+  ],
+  "copy": [
+    {
+      "id": "C1",
+      "loaned": 0,
+      "planned_shelf": "S1",
+      "batch": "INV-Q"
+    },
+    {
+      "id": "C2",
+      "loaned": 0,
+      "planned_shelf": "S2",
+      "batch": "INV-Q"
+    },
+    {
+      "id": "C3",
+      "loaned": 0,
+      "planned_shelf": "S3",
+      "batch": "INV-Q"
+    }
+  ]
+}
