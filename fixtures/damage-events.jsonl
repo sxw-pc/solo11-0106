@@ -1,0 +1,8 @@
+{"kind":"borrow","device":"L1","seq":1,"copy_id":"C1","patron":"P1","at":"2030-06-01T09:00:00Z"}
+{"kind":"return","device":"L1","seq":2,"copy_id":"C1","patron":"P1","at":"2030-06-01T12:00:00Z"}
+{"kind":"borrow","device":"L1","seq":3,"copy_id":"C1","patron":"P2","at":"2030-06-01T12:05:00Z"}
+{"kind":"return","device":"L1","seq":4,"copy_id":"C1","patron":"P2","at":"2030-06-01T16:00:00Z"}
+{"kind":"scan","device":"R1","seq":1,"copy_id":"C1","at":"2030-06-01T16:05:00Z","shelf":"S1","signal":85}
+{"kind":"borrow","device":"L2","seq":1,"copy_id":"C2","patron":"P3","at":"2030-06-01T09:00:00Z"}
+{"kind":"return","device":"L2","seq":2,"copy_id":"C2","patron":"P3","at":"2030-06-01T15:00:00Z"}
+{"kind":"scan","device":"R2","seq":1,"copy_id":"C2","at":"2030-06-01T15:05:00Z","shelf":"S2","signal":85}
