@@ -1,0 +1,1 @@
+{"sources":["archive-source-a.jsonl","archive-source-b.jsonl"],"representations":[{"id":"fixed_64","block_bytes":64},{"id":"record_chunks","preserve_delimiters":true}]}
