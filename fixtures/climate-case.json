@@ -1,0 +1,1 @@
+{"shelves":[{"id":"S1","initial_c":20,"limit_c":22,"warming_c":[3,3]},{"id":"S2","initial_c":20,"limit_c":21,"warming_c":[2,2]}],"cooler":{"max_shelves_per_period":1,"cooling_c":2,"tariff_cents":[100,1000]},"total_exposure_limit":6,"contracts":["min_energy","min_max_shelf_exposure"]}

@@ -1,0 +1,2 @@
+{"kind":"scan","device":"R1","seq":1,"copy_id":"C1","at":"2030-06-01T08:00:00Z","shelf":"S1","signal":80}
+{"kind":"scan","device":"R2","seq":1,"copy_id":"C2","at":"2030-06-01T08:01:00Z","shelf":"S2","signal":80}
