@@ -1,0 +1,1 @@
+{"readers":[{"id":"R1","cell":"CELL-1","current_version":"v1"},{"id":"R2","cell":"CELL-1","current_version":"v1"},{"id":"R3","cell":"CELL-2","current_version":"v1"}],"target_version":"v2","faults":{"R2":"commit_then_ack_lost","R3":"reject"},"contracts":["atomic_fleet","cell_isolated"]}
