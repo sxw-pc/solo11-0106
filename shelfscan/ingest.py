@@ -13,6 +13,7 @@ def ingest(path,db_path):
     count=0
     with db:
         sid=db.execute('INSERT INTO source(name,sha256,raw) VALUES (?,?,?)',(str(path),h,raw)).lastrowid
+        db.execute('INSERT INTO source_state(source_id,generation,raw_retained,byte_length) VALUES (?,0,1,?)',(sid,len(raw)))
         for line,text in enumerate(raw.decode('utf-8-sig').splitlines(),1):
             try:
                 r=json.loads(text);kind=r['kind'];device=str(r['device']);seq=int(r['seq']);copy=str(r['copy_id']);when(r['at'])
