@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS run(id INTEGER PRIMARY KEY, status TEXT NOT NULL CHEC
 CREATE TABLE IF NOT EXISTS firmware_case(id TEXT PRIMARY KEY,payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS firmware_device(id TEXT PRIMARY KEY,cell TEXT NOT NULL,version TEXT NOT NULL,revision INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS firmware_operation(id TEXT PRIMARY KEY,device TEXT NOT NULL,action TEXT NOT NULL,result TEXT NOT NULL,revision_before INTEGER NOT NULL,revision_after INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS firmware_intent(id TEXT PRIMARY KEY,case_id TEXT NOT NULL,contract TEXT NOT NULL CHECK(contract IN ('atomic_fleet','cell_isolated')),target_version TEXT NOT NULL,package_sha256 TEXT NOT NULL,intent_sha256 TEXT NOT NULL,status TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS firmware_intent_device(intent_id TEXT NOT NULL REFERENCES firmware_intent(id),device TEXT NOT NULL,cell TEXT NOT NULL,current_version TEXT NOT NULL,frozen_revision INTEGER NOT NULL,target_version TEXT NOT NULL,latest_event_id INTEGER NOT NULL,latest_event_sha256 TEXT NOT NULL,latest_source_sha256 TEXT NOT NULL,install_operation_id TEXT NOT NULL,rollback_operation_id TEXT NOT NULL,state TEXT NOT NULL,detail TEXT NOT NULL,PRIMARY KEY(intent_id,device));
+CREATE TABLE IF NOT EXISTS firmware_release(intent_id TEXT NOT NULL,cell TEXT NOT NULL,status TEXT NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(intent_id,cell));
+CREATE TABLE IF NOT EXISTS firmware_journal(id INTEGER PRIMARY KEY AUTOINCREMENT,intent_id TEXT NOT NULL,device TEXT,cell TEXT,event TEXT NOT NULL,detail TEXT NOT NULL,at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS firmware_reader_availability(intent_id TEXT NOT NULL,device TEXT NOT NULL,cell TEXT NOT NULL,eligible INTEGER NOT NULL CHECK(eligible IN (0,1)),reason TEXT NOT NULL,version TEXT NOT NULL,revision INTEGER NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(intent_id,device));
 """
 def connect(path):
-    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True);db=sqlite3.connect(path);db.row_factory=sqlite3.Row;db.executescript(SCHEMA);return db
+    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True);db=sqlite3.connect(path);db.row_factory=sqlite3.Row;db.execute('PRAGMA busy_timeout=5000');db.executescript(SCHEMA);return db
