@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS decision(copy_id TEXT PRIMARY KEY,status TEXT NOT NUL
 CREATE TABLE IF NOT EXISTS evidence(id INTEGER PRIMARY KEY, event_id INTEGER NOT NULL REFERENCES event(id), source_sha256 TEXT NOT NULL, payload_sha256 TEXT NOT NULL, role TEXT NOT NULL, UNIQUE(event_id,role));
 CREATE TABLE IF NOT EXISTS run(id INTEGER PRIMARY KEY, status TEXT NOT NULL CHECK(status IN ('待接收','已校验','待核','已判定','作废')), started_at TEXT NOT NULL, ended_at TEXT);
 CREATE TABLE IF NOT EXISTS climate_case(id TEXT PRIMARY KEY,payload TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS climate_plan(case_id TEXT NOT NULL REFERENCES climate_case(id),plan_version TEXT NOT NULL,status TEXT NOT NULL CHECK(status IN ('可执行','待核')),objective TEXT,payload TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(case_id,plan_version));
+CREATE TABLE IF NOT EXISTS climate_command(case_id TEXT NOT NULL,plan_version TEXT NOT NULL,period INTEGER NOT NULL,shelf TEXT,status TEXT NOT NULL CHECK(status IN ('待执行','已执行','已作废')),price_cents INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(case_id,plan_version,period));
+CREATE TABLE IF NOT EXISTS climate_feedback(id INTEGER PRIMARY KEY AUTOINCREMENT,case_id TEXT NOT NULL REFERENCES climate_case(id),base_version TEXT NOT NULL,new_version TEXT NOT NULL,through_period INTEGER NOT NULL,readings_sha256 TEXT NOT NULL,payload TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 """
 def connect(path):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True);db=sqlite3.connect(path);db.row_factory=sqlite3.Row;db.executescript(SCHEMA);return db
