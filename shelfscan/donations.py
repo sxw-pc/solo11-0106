@@ -18,7 +18,7 @@ def register(db_path, case_id, fixture):
             if db.execute('SELECT 1 FROM copy WHERE id=?', (tag,)).fetchone():
                 raise ValueError('donation_tag_already_catalogued')
             events = [dict(row) for row in db.execute(
-                'SELECT e.id,e.device,e.seq,e.at,e.shelf,e.signal,e.sha256,'
+                'SELECT e.id,e.copy_id,e.device,e.seq,e.at,e.shelf,e.signal,e.sha256,'
                 's.sha256 AS source_sha256 FROM event e JOIN source s ON s.id=e.source_id '
                 'WHERE e.copy_id=? ORDER BY e.at,e.id', (tag,))]
             if not events:
